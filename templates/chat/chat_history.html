@@ -1,0 +1,105 @@
+{% extends 'base.html' %}
+
+{% block title %}سجل المحادثات - Palestina-ai{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-12">
+        <h1 class="mb-4">سجل المحادثات</h1>
+        
+        <div class="card mb-4">
+            <div class="card-header">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h3 class="mb-0">المحادثات السابقة</h3>
+                    <form class="d-flex" action="{% url 'chat:chat_search' %}" method="get">
+                        <input class="form-control me-2" type="search" name="q" placeholder="بحث في المحادثات..." aria-label="بحث">
+                        <button class="btn btn-outline-success" type="submit">بحث</button>
+                    </form>
+                </div>
+            </div>
+            <div class="card-body">
+                {% if sessions %}
+                    <div class="list-group">
+                        {% for session in sessions %}
+                            <a href="#" class="list-group-item list-group-item-action" data-bs-toggle="collapse" data-bs-target="#session-{{ session.id }}">
+                                <div class="d-flex w-100 justify-content-between">
+                                    <h5 class="mb-1">محادثة {{ forloop.counter }}</h5>
+                                    <small>{{ session.created_at|date:"Y/m/d H:i" }}</small>
+                                </div>
+                                <small>آخر تحديث: {{ session.updated_at|date:"Y/m/d H:i" }}</small>
+                            </a>
+                            <div class="collapse" id="session-{{ session.id }}">
+                                <div class="card card-body">
+                                    {% for message in session.messages.all %}
+                                        <div class="message message-{{ message.role }} mb-2">
+                                            <p>{{ message.content }}</p>
+                                            <small class="text-muted">{{ message.created_at|date:"H:i" }}</small>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="alert alert-info">
+                        لا توجد محادثات سابقة. <a href="{% url 'chat:chat_home' %}" class="alert-link">ابدأ محادثة جديدة</a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+        
+        <div class="card">
+            <div class="card-header">
+                <h3 class="mb-0">إدارة المحادثات</h3>
+            </div>
+            <div class="card-body">
+                <p>يمكنك إدارة محادثاتك السابقة من هنا.</p>
+                <button id="clear-history-btn" class="btn btn-danger">
+                    <i class="fas fa-trash"></i> مسح سجل المحادثات
+                </button>
+                <div id="clear-result" class="mt-3"></div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const clearHistoryBtn = document.getElementById('clear-history-btn');
+        const clearResult = document.getElementById('clear-result');
+        
+        clearHistoryBtn.addEventListener('click', function() {
+            if (confirm('هل أنت متأكد من رغبتك في مسح سجل المحادثات؟ لا يمكن التراجع عن هذه العملية.')) {
+                // Envoyer la requête de suppression à l'API
+                fetch('/chat/delete-history/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({}),
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        localStorage.removeItem('chat_session_id');
+                        clearResult.innerHTML = '<div class="alert alert-success">تم مسح سجل المحادثات بنجاح.</div>';
+                        
+                        // Recharger la page après 2 secondes
+                        setTimeout(function() {
+                            window.location.reload();
+                        }, 2000);
+                    } else {
+                        clearResult.innerHTML = '<div class="alert alert-danger">حدث خطأ أثناء مسح السجل: ' + data.message + '</div>';
+                    }
+                })
+                .catch(error => {
+                    console.error('Error deleting history:', error);
+                    clearResult.innerHTML = '<div class="alert alert-danger">حدث خطأ أثناء مسح السجل. يرجى المحاولة مرة أخرى.</div>';
+                });
+            }
+        });
+    });
+</script>
+{% endblock %}

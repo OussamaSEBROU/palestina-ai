@@ -1,0 +1,102 @@
+{% extends 'base.html' %}
+
+{% block title %}المقالات - Palestina-ai{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8">
+        <h1 class="mb-4">المقالات</h1>
+        
+        <div class="row">
+            {% if articles %}
+                {% for article in articles %}
+                    <div class="col-md-6 mb-4">
+                        <div class="card h-100">
+                            {% if article.image %}
+                                <img src="{{ article.image.url }}" class="article-image" alt="{{ article.title }}">
+                            {% else %}
+                                <div class="bg-secondary article-image d-flex align-items-center justify-content-center">
+                                    <i class="fas fa-newspaper fa-3x text-white"></i>
+                                </div>
+                            {% endif %}
+                            <div class="card-body">
+                                <h5 class="card-title">{{ article.title }}</h5>
+                                <p class="card-text">{{ article.summary }}</p>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <a href="{% url 'articles:article_detail' article.id %}" class="btn btn-outline-success">قراءة المزيد</a>
+                                    <small class="text-muted">{{ article.created_at|date:"Y/m/d" }}</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <div class="col-12">
+                    <div class="alert alert-info">
+                        لا توجد مقالات متاحة حالياً. يرجى العودة لاحقاً.
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">التصنيفات</h5>
+            </div>
+            <div class="card-body">
+                <ul class="list-group list-group-flush">
+                    {% if categories %}
+                        {% for category in categories %}
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <a href="{% url 'articles:category_detail' category.id %}" class="text-decoration-none">{{ category.name }}</a>
+                                <span class="badge bg-success rounded-pill">{{ category.articles.count }}</span>
+                            </li>
+                        {% endfor %}
+                    {% else %}
+                        <li class="list-group-item">لا توجد تصنيفات متاحة</li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+        
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">اقتراح مقال</h5>
+            </div>
+            <div class="card-body">
+                <p>هل ترغب في اقتراح موضوع لمقال جديد حول القضية الفلسطينية؟</p>
+                <div class="mb-3">
+                    <label for="article-suggestion" class="form-label">موضوع المقال</label>
+                    <input type="text" class="form-control" id="article-suggestion" placeholder="اكتب موضوع المقال هنا">
+                </div>
+                <button id="suggest-article-btn" class="btn btn-success">اقتراح</button>
+                <div id="suggestion-result" class="mt-2"></div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const suggestBtn = document.getElementById('suggest-article-btn');
+        const suggestionInput = document.getElementById('article-suggestion');
+        const suggestionResult = document.getElementById('suggestion-result');
+        
+        suggestBtn.addEventListener('click', function() {
+            const suggestion = suggestionInput.value.trim();
+            if (!suggestion) {
+                suggestionResult.innerHTML = '<div class="alert alert-warning">يرجى إدخال موضوع للمقال</div>';
+                return;
+            }
+            
+            // Simuler l'envoi de la suggestion (dans une version réelle, cela serait envoyé à l'API)
+            suggestionResult.innerHTML = '<div class="alert alert-success">شكراً لاقتراحك! سنأخذه بعين الاعتبار.</div>';
+            suggestionInput.value = '';
+        });
+    });
+</script>
+{% endblock %}

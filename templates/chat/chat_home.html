@@ -1,0 +1,173 @@
+{% extends 'base.html' %}
+
+{% block title %}المحادثة - Palestina-ai{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header">
+                <h2 class="mb-0">المحادثة مع Palestina-ai</h2>
+            </div>
+            <div class="card-body">
+                <div id="chat-container" class="chat-container mb-3">
+                    <div id="messages-container">
+                        <div class="message message-assistant">
+                            <p>مرحباً بك في Palestina-ai! أنا هنا للإجابة على أسئلتك حول القضية الفلسطينية وتقديم معلومات دقيقة وموثوقة. كيف يمكنني مساعدتك اليوم؟</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="input-group">
+                    <input type="text" id="user-message" class="form-control" placeholder="اكتب رسالتك هنا..." aria-label="رسالتك">
+                    <button class="btn btn-success" type="button" id="send-message">
+                        <i class="fas fa-paper-plane"></i> إرسال
+                    </button>
+                </div>
+                
+                <div class="mt-3">
+                    <small class="text-muted">هذا المساعد مخصص فقط للإجابة على الأسئلة المتعلقة بالقضية الفلسطينية.</small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const messagesContainer = document.getElementById('messages-container');
+        const userMessageInput = document.getElementById('user-message');
+        const sendMessageButton = document.getElementById('send-message');
+        
+        // Session ID pour suivre la conversation
+        let sessionId = localStorage.getItem('chat_session_id') || '';
+        
+        // Fonction pour envoyer un message
+        function sendMessage() {
+            const message = userMessageInput.value.trim();
+            if (!message) return;
+            
+            // Ajouter le message de l'utilisateur à l'interface
+            addMessage(message, 'user');
+            
+            // Vider l'input
+            userMessageInput.value = '';
+            
+            // Ajouter un message de chargement
+            const loadingId = addLoadingMessage();
+            
+            // Envoyer le message à l'API
+            fetch('/chat/process/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    message: message,
+                    session_id: sessionId
+                }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                // Supprimer le message de chargement
+                removeLoadingMessage(loadingId);
+                
+                if (data.status === 'success') {
+                    // Ajouter la réponse à l'interface
+                    addMessage(data.message, 'assistant');
+                    
+                    // Sauvegarder l'ID de session
+                    sessionId = data.session_id;
+                    localStorage.setItem('chat_session_id', sessionId);
+                } else {
+                    // Afficher un message d'erreur
+                    addErrorMessage();
+                }
+            })
+            .catch(error => {
+                console.error('Error sending message:', error);
+                // Supprimer le message de chargement
+                removeLoadingMessage(loadingId);
+                // Afficher un message d'erreur
+                addErrorMessage();
+            });
+        }
+        
+        // Fonction pour ajouter un message à l'interface
+        function addMessage(content, role) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message message-${role}`;
+            
+            const paragraph = document.createElement('p');
+            paragraph.textContent = content;
+            
+            messageDiv.appendChild(paragraph);
+            messagesContainer.appendChild(messageDiv);
+            
+            // Faire défiler vers le bas
+            scrollToBottom();
+        }
+        
+        // Fonction pour ajouter un message de chargement
+        function addLoadingMessage() {
+            const id = 'loading-' + Date.now();
+            const loadingDiv = document.createElement('div');
+            loadingDiv.className = 'message message-assistant';
+            loadingDiv.id = id;
+            
+            const spinner = document.createElement('div');
+            spinner.className = 'loading-spinner';
+            spinner.style.width = '1.5rem';
+            spinner.style.height = '1.5rem';
+            
+            loadingDiv.appendChild(spinner);
+            messagesContainer.appendChild(loadingDiv);
+            
+            // Faire défiler vers le bas
+            scrollToBottom();
+            
+            return id;
+        }
+        
+        // Fonction pour supprimer le message de chargement
+        function removeLoadingMessage(id) {
+            const loadingDiv = document.getElementById(id);
+            if (loadingDiv) {
+                loadingDiv.remove();
+            }
+        }
+        
+        // Fonction pour ajouter un message d'erreur
+        function addErrorMessage() {
+            const errorDiv = document.createElement('div');
+            errorDiv.className = 'message message-assistant';
+            
+            const paragraph = document.createElement('p');
+            paragraph.textContent = 'عذراً، حدث خطأ أثناء معالجة رسالتك. يرجى المحاولة مرة أخرى.';
+            
+            errorDiv.appendChild(paragraph);
+            messagesContainer.appendChild(errorDiv);
+            
+            // Faire défiler vers le bas
+            scrollToBottom();
+        }
+        
+        // Fonction pour faire défiler vers le bas
+        function scrollToBottom() {
+            const chatContainer = document.getElementById('chat-container');
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        }
+        
+        // Écouteurs d'événements
+        sendMessageButton.addEventListener('click', sendMessage);
+        
+        userMessageInput.addEventListener('keypress', function(event) {
+            if (event.key === 'Enter') {
+                sendMessage();
+            }
+        });
+    });
+</script>
+{% endblock %}

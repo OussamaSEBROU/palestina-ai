@@ -1,0 +1,185 @@
+/* styles.css - Fichier principal de styles pour Palestina-ai */
+
+:root {
+    /* Couleurs du drapeau palestinien */
+    --palestine-green: #0d9b4d;
+    --palestine-black: #000000;
+    --palestine-white: #ffffff;
+    --palestine-red: #ce1126;
+    
+    /* Variables pour le thème clair */
+    --light-bg: #f8f9fa;
+    --light-text: #212529;
+    --light-card: #ffffff;
+    --light-border: #dee2e6;
+    
+    /* Variables pour le thème sombre */
+    --dark-bg: #121212;
+    --dark-text: #e0e0e0;
+    --dark-card: #1e1e1e;
+    --dark-border: #333333;
+}
+
+/* Thème clair (par défaut) */
+.theme-light {
+    --bg-color: var(--light-bg);
+    --text-color: var(--light-text);
+    --card-bg: var(--light-card);
+    --border-color: var(--light-border);
+    --accent-color: var(--palestine-green);
+}
+
+/* Thème sombre */
+.theme-dark {
+    --bg-color: var(--dark-bg);
+    --text-color: var(--dark-text);
+    --card-bg: var(--dark-card);
+    --border-color: var(--dark-border);
+    --accent-color: var(--palestine-green);
+}
+
+body {
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    transition: background-color 0.3s, color 0.3s;
+    font-family: 'Tajawal', sans-serif;
+}
+
+/* Styles pour la barre de navigation */
+.navbar {
+    background: linear-gradient(to right, var(--palestine-black), var(--palestine-green)) !important;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.navbar-brand {
+    font-weight: bold;
+    font-size: 1.5rem;
+}
+
+/* Styles pour les cartes */
+.card {
+    background-color: var(--card-bg);
+    border: 1px solid var(--border-color);
+    transition: transform 0.3s, box-shadow 0.3s;
+    margin-bottom: 1.5rem;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+}
+
+.card-header {
+    background-color: var(--palestine-green);
+    color: white;
+    font-weight: bold;
+}
+
+/* Styles pour les boutons */
+.btn-primary {
+    background-color: var(--palestine-green);
+    border-color: var(--palestine-green);
+}
+
+.btn-primary:hover {
+    background-color: #0a7b3d;
+    border-color: #0a7b3d;
+}
+
+.btn-outline-primary {
+    color: var(--palestine-green);
+    border-color: var(--palestine-green);
+}
+
+.btn-outline-primary:hover {
+    background-color: var(--palestine-green);
+    color: white;
+}
+
+/* Styles pour le pied de page */
+footer {
+    background: linear-gradient(to right, var(--palestine-black), var(--palestine-green)) !important;
+}
+
+footer a {
+    text-decoration: none;
+    transition: color 0.3s;
+}
+
+footer a:hover {
+    color: var(--palestine-red) !important;
+}
+
+/* Styles pour la page d'accueil */
+.hero-section {
+    background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), url('/static/img/palestine-bg.jpg');
+    background-size: cover;
+    background-position: center;
+    color: white;
+    padding: 5rem 0;
+    margin-bottom: 2rem;
+    border-radius: 0.5rem;
+}
+
+/* Styles pour le chat */
+.chat-container {
+    height: 70vh;
+    overflow-y: auto;
+    border: 1px solid var(--border-color);
+    border-radius: 0.5rem;
+    padding: 1rem;
+    background-color: var(--card-bg);
+}
+
+.message {
+    margin-bottom: 1rem;
+    padding: 0.75rem;
+    border-radius: 0.5rem;
+    max-width: 80%;
+}
+
+.message-user {
+    background-color: var(--palestine-green);
+    color: white;
+    margin-left: auto;
+}
+
+.message-assistant {
+    background-color: var(--card-bg);
+    border: 1px solid var(--border-color);
+    margin-right: auto;
+}
+
+/* Styles pour les articles */
+.article-image {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+    border-radius: 0.5rem 0.5rem 0 0;
+}
+
+/* Styles responsifs */
+@media (max-width: 768px) {
+    .hero-section {
+        padding: 3rem 0;
+    }
+    
+    .message {
+        max-width: 90%;
+    }
+}
+
+/* Animation pour le chargement */
+.loading-spinner {
+    width: 3rem;
+    height: 3rem;
+    border: 5px solid var(--border-color);
+    border-top: 5px solid var(--palestine-green);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}

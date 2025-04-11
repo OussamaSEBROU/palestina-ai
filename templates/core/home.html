@@ -1,0 +1,262 @@
+{% extends 'base.html' %}
+
+{% block title %}الصفحة الرئيسية - Palestina-ai{% endblock %}
+
+{% block content %}
+<div class="hero-section text-center">
+    <div class="container">
+        <h1 class="display-4">Palestina-ai</h1>
+        <p class="lead">منصة متخصصة لدعم القضية الفلسطينية وتقديم محتوى حصري ودقيق حول فلسطين</p>
+        <a href="{% url 'chat:chat_home' %}" class="btn btn-success btn-lg mt-3">
+            <i class="fas fa-comments"></i> ابدأ المحادثة
+        </a>
+    </div>
+</div>
+
+<div class="row mt-5">
+    <div class="col-md-4">
+        <div class="card h-100">
+            <div class="card-body text-center">
+                <i class="fas fa-comment-dots fa-3x text-success mb-3"></i>
+                <h3 class="card-title">محادثة ذكية</h3>
+                <p class="card-text">تحدث مع المساعد الذكي المتخصص في القضية الفلسطينية واحصل على معلومات دقيقة وموثوقة.</p>
+                <a href="{% url 'chat:chat_home' %}" class="btn btn-outline-success">جرب الآن</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card h-100">
+            <div class="card-body text-center">
+                <i class="fas fa-newspaper fa-3x text-success mb-3"></i>
+                <h3 class="card-title">مقالات متخصصة</h3>
+                <p class="card-text">اطلع على مقالات معمقة حول تاريخ فلسطين، والتطورات الحديثة، والقضايا المهمة.</p>
+                <a href="{% url 'articles:article_list' %}" class="btn btn-outline-success">تصفح المقالات</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card h-100">
+            <div class="card-body text-center">
+                <i class="fas fa-hands-helping fa-3x text-success mb-3"></i>
+                <h3 class="card-title">طرق الدعم</h3>
+                <p class="card-text">تعرف على الطرق العملية لدعم القضية الفلسطينية على المستويين الفردي والجماعي.</p>
+                <a href="{% url 'core:support' %}" class="btn btn-outline-success">اكتشف طرق الدعم</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="mt-5">
+    <h2 class="text-center mb-4">آخر البيانات الاقتصادية عن فلسطين</h2>
+    <div class="card">
+        <div class="card-body">
+            <div id="economic-data-loading" class="text-center">
+                <div class="loading-spinner mx-auto"></div>
+                <p class="mt-3">جاري تحميل البيانات الاقتصادية...</p>
+            </div>
+            <div id="economic-data-content" class="d-none">
+                <!-- Le contenu sera rempli par JavaScript -->
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-5">
+    <div class="col-md-6">
+        <h2 class="mb-4">اقتباسات داعمة للقضية</h2>
+        <div class="card">
+            <div class="card-body">
+                <blockquote class="blockquote">
+                    <p>"فلسطين ليست قضية جغرافية، إنها قضية إنسانية."</p>
+                    <footer class="blockquote-footer">محمود درويش</footer>
+                </blockquote>
+            </div>
+        </div>
+        <div class="card mt-3">
+            <div class="card-body">
+                <blockquote class="blockquote">
+                    <p>"القضية الفلسطينية هي قضية كل إنسان يؤمن بالعدالة والحرية."</p>
+                    <footer class="blockquote-footer">إدوارد سعيد</footer>
+                </blockquote>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <h2 class="mb-4">توليد صور داعمة للقضية</h2>
+        <div class="card">
+            <div class="card-body">
+                <p>استخدم تقنية الذكاء الاصطناعي لتوليد صور داعمة للقضية الفلسطينية.</p>
+                <div class="mb-3">
+                    <label for="image-prompt" class="form-label">وصف الصورة</label>
+                    <input type="text" class="form-control" id="image-prompt" placeholder="مثال: علم فلسطين يرفرف فوق القدس">
+                </div>
+                <button id="generate-image-btn" class="btn btn-success">توليد الصورة</button>
+                <div id="generated-image-container" class="mt-3 d-none">
+                    <div id="image-loading" class="text-center">
+                        <div class="loading-spinner mx-auto"></div>
+                        <p class="mt-2">جاري توليد الصورة...</p>
+                    </div>
+                    <img id="generated-image" class="img-fluid rounded d-none" alt="صورة مولدة">
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Charger les données économiques
+        loadEconomicData();
+        
+        // Configurer le bouton de génération d'image
+        const generateImageBtn = document.getElementById('generate-image-btn');
+        generateImageBtn.addEventListener('click', generateImage);
+    });
+    
+    function loadEconomicData() {
+        fetch('/api/palestine-economic-data/')
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    displayEconomicData(data);
+                } else {
+                    showEconomicDataError();
+                }
+            })
+            .catch(error => {
+                console.error('Error loading economic data:', error);
+                showEconomicDataError();
+            });
+    }
+    
+    function displayEconomicData(data) {
+        const container = document.getElementById('economic-data-content');
+        const loading = document.getElementById('economic-data-loading');
+        
+        // Créer le contenu HTML pour les données économiques
+        let html = '<div class="row">';
+        
+        // PIB
+        const gdpData = data.gdp;
+        const latestGdpYear = Object.keys(gdpData.data).filter(year => gdpData.data[year] !== null).pop();
+        const latestGdp = gdpData.data[latestGdpYear];
+        
+        html += `
+            <div class="col-md-4">
+                <div class="card text-center h-100">
+                    <div class="card-body">
+                        <h5 class="card-title">الناتج المحلي الإجمالي</h5>
+                        <p class="display-6">${formatNumber(latestGdp)} $</p>
+                        <p class="text-muted">${latestGdpYear}</p>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        // Population
+        const popData = data.population;
+        const latestPopYear = Object.keys(popData.data).filter(year => popData.data[year] !== null).pop();
+        const latestPop = popData.data[latestPopYear];
+        
+        html += `
+            <div class="col-md-4">
+                <div class="card text-center h-100">
+                    <div class="card-body">
+                        <h5 class="card-title">عدد السكان</h5>
+                        <p class="display-6">${formatNumber(latestPop)}</p>
+                        <p class="text-muted">${latestPopYear}</p>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        // Chômage
+        const unempData = data.unemployment;
+        const latestUnempYear = Object.keys(unempData.data).filter(year => unempData.data[year] !== null).pop();
+        const latestUnemp = unempData.data[latestUnempYear];
+        
+        html += `
+            <div class="col-md-4">
+                <div class="card text-center h-100">
+                    <div class="card-body">
+                        <h5 class="card-title">معدل البطالة</h5>
+                        <p class="display-6">${latestUnemp.toFixed(1)}%</p>
+                        <p class="text-muted">${latestUnempYear}</p>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        html += '</div>';
+        
+        // Afficher les données et masquer le chargement
+        container.innerHTML = html;
+        container.classList.remove('d-none');
+        loading.classList.add('d-none');
+    }
+    
+    function showEconomicDataError() {
+        const container = document.getElementById('economic-data-content');
+        const loading = document.getElementById('economic-data-loading');
+        
+        container.innerHTML = `
+            <div class="alert alert-warning">
+                <i class="fas fa-exclamation-triangle"></i> تعذر تحميل البيانات الاقتصادية. يرجى المحاولة مرة أخرى لاحقًا.
+            </div>
+        `;
+        
+        container.classList.remove('d-none');
+        loading.classList.add('d-none');
+    }
+    
+    function generateImage() {
+        const prompt = document.getElementById('image-prompt').value.trim();
+        if (!prompt) {
+            alert('يرجى إدخال وصف للصورة');
+            return;
+        }
+        
+        const imageContainer = document.getElementById('generated-image-container');
+        const imageLoading = document.getElementById('image-loading');
+        const generatedImage = document.getElementById('generated-image');
+        
+        // Afficher le conteneur et le chargement
+        imageContainer.classList.remove('d-none');
+        imageLoading.classList.remove('d-none');
+        generatedImage.classList.add('d-none');
+        
+        // Envoyer la requête à l'API
+        fetch('/api/generate-image/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ prompt: prompt }),
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                // Afficher l'image générée
+                generatedImage.src = data.image_url;
+                generatedImage.classList.remove('d-none');
+            } else {
+                alert('حدث خطأ أثناء توليد الصورة: ' + data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error generating image:', error);
+            alert('حدث خطأ أثناء توليد الصورة. يرجى المحاولة مرة أخرى.');
+        })
+        .finally(() => {
+            // Masquer le chargement
+            imageLoading.classList.add('d-none');
+        });
+    }
+    
+    function formatNumber(num) {
+        return new Intl.NumberFormat().format(Math.round(num));
+    }
+</script>
+{% endblock %}
